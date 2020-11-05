@@ -1,13 +1,13 @@
 include("arnoldi.jl")
 using LinearAlgebra, Arpack, MatrixDepot, Random
 
-nn=1;
-m = 5;
+nn=10;
+m = 6;
 Random.seed!(0)
 A=matrixdepot("wathen",nn,nn)
 #A = Diagonal([1, 2, 30, 3, 8, 9, 4]);
 n = size(A)[2];
-b = 10*rand(n)
+b = randn(n)
 
 ## "True" values
 vals, vecs = eigs(A)

@@ -1,9 +1,9 @@
-#tests
 include("my_hw1_gs.jl")
+include("arnoldi.jl")
 
-b = [1 2 3]'
-A = [1 2 3; 0 1 0; 0 0 1]
-B = [1 0 3; 0 1 0; 4 0 1]
-
-x = A\b
-display(x)
+using Random
+A=randn(100,100); b=randn(100);
+m=10;
+Q,H=arnoldi(A,b,m);
+println("1:st should be zero = ", norm(Q*H-A*Q[:,1:m]));
+println("2:nd Should be zero = ", norm(Q'*Q-I));

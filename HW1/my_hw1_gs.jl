@@ -7,7 +7,6 @@ function my_hw1_gs(Q,b)
     z = z-Q*g;
     h = h+g;
     β = norm(z);
-    z = z/norm(z);
 
     return h, β, z
 end
