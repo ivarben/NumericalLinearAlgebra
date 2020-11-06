@@ -1,5 +1,5 @@
 include("arnoldi.jl")
-using MAT, LinearAlgebra, Arpack, Plots
+using MAT, LinearAlgebra, Arpack#, Plots
 
 B = matread("Bwedge.mat")["B"];
 B_eigvals = matread("Bwedge.mat")["B_eigvals"];
