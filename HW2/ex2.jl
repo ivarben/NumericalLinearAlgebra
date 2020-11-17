@@ -1,27 +1,62 @@
 include("GMRES.jl")
 
-using LinearAlgebra, SparseArrays, Random
+using LinearAlgebra, SparseArrays, Random, Plots, Arpack
 
-alpha=100; n=100; Random.seed!(1)
-A = sprand(n,n,0.5);
-A = A + alpha*sparse(1.0*I, n, n); A=A/norm(A,1);
-b = rand(n,1);
-
-x = GMRES(A, b, 100)
-r = norm(A*x - b)
+n=100;
+A_list = [];
+b_list = [];
+for alpha = [1 5 10 100]
+    Random.seed!(1)
+    A = sprand(n,n,0.5);
+    A = A + alpha*sparse(1.0*I, n, n); A=A/norm(A,1);
+    b = rand(n,1);
+    push!(A_list, A);
+    push!(b_list, b);
+end
 
 ## a) Plot residual and error norm in semilog plot. Do it for alpha = 1,5,10,100.
+alpha_index = 4;
+A = A_list[alpha_index]; # index depending on alpha
+b = b_list[alpha_index]; # index depending on alpha
 x_true = A\b;
-for m = 1:110
-    x_tilde = GMRES(A, b, m);
+m = 100
+res_norms = [];
+err_norms = [];
+Q = zeros(n,m+1);
+H = zeros(m+1,m);
+Q[:,1] = b/norm(b);
+
+for k=1:m
+    w=A*Q[:,k]; # Matrix-vector product with last element
+    # Orthogonalize w against columns of Q.
+    # Implement this function or replace call with code for orthogonalizatio
+    h,β,z = my_hw1_gs(Q[:,1:k],w);
+    #Put Gram-Schmidt coefficients into H
+    H[1:(k+1),k] = [h;β];
+    # normalize
+    Q[:,k+1] = z/β;
+
+    z_star = H[1:(k+1),1:k]\([1; zeros(k)]*norm(b));
+    x_tilde = Q[:,1:k]*z_star;
+
     res_norm = norm(A*x_tilde - b);
     err_norm = norm(x_tilde - x_true);
-    display(res_norm) # Change to plot
-    display(err_norm) # Change to plot
+    append!(res_norms, res_norm)
+    append!(err_norms, err_norm)
 end
+plot(1:m, res_norms, label = "residual error norm", yaxis=:log)
+plot!(1:m, err_norms, label = "error norm")
+plot!(1:m, convergence_factors[alpha_index].^(1:m), label = "expected convergence")
 
 ## b) Plot eigenvalues of A for alpha = 1,5,10,100. Provide bounds on convergence factors.
 #Plot the convergence factors in the semilog plots from a)
+scatter(eigvals(Matrix(A_list[1])), label = "alpha = 1", aspect_ratio = 1)
+scatter!(eigvals(Matrix(A_list[2])), label = "alpha = 5")
+scatter!(eigvals(Matrix(A_list[3])), label = "alpha = 10")
+scatter!(eigvals(Matrix(A_list[4])), label = "alpha = 100")
+
+# Estimated convergence factors:
+convergence_factors = [0.00125/0.0005, 0.0011/0.0015, 0.0009/0.003, 0.001/0.009]
 
 ## c) Generate tables with computation times for alpha = 1, 100. For GMRES and "backslash", m = 5, 10, 20, 50, 100, n = 100, 200, 500.
 alpha = 100; # 1, 100
