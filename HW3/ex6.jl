@@ -11,11 +11,9 @@ for power = -10:-1
     FJ = E.vectors*Diagonal(exp.(E.values))*inv(E.vectors)
 
     ## find exp(A) using the formula in b)
-    β = (exp(π+ε) - exp(π))/ε;
+    β = (exp(π + ε) - exp(π))/ε;
     α = exp(π) - β*π;
-    V = [1 1; 0 ε];
-    V_inv = [1 -1/ε; 0 1/ε];
-    F = V*Diagonal(α .+ β*[π; π+ε])*V_inv;
+    F = α*I + β*A;
 
     error = norm(F-FJ);
     scatter!(plt, [ε], [error], label=nothing, marker=:x, color = :red)

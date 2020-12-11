@@ -27,6 +27,7 @@ for N=1:400
     f=z->z^N;
     F = schur_parlett(A, f)
     end
+    display(norm(B-F))
 
     scatter!(plt, [N], [t_naive[2]], marker=:x, color=:black, label=nothing)
     scatter!(plt, [N], [t_SP[2]], marker=:o, color=:red, label=nothing)
