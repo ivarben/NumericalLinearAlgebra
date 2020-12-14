@@ -1,6 +1,6 @@
 include("schur_parlett.jl")
 
-using LinearAlgebra, Plots
+using LinearAlgebra, Plots, Random
 
 ## a)
 f=z->sin(z);
@@ -9,28 +9,41 @@ F = schur_parlett(A, f)
 display(norm(F-sin(A)))
 
 ## b)
+Random.seed!(4)
 A = rand(100,100);
 A=A/norm(A);
 
 plt = scatter([0], [0], label="Naive", marker=:x, color=:black, xlabel="N", ylabel="CPU-time")
 scatter!(plt, [0], [0], label="Schur-Parlett", marker=:o, color=:red)
-for N=1:400
+
+trials=10;
+for N = 5:5:400
+#for N=1:400
     #Naive:
-    t_naive = @timed begin
+    t_naive = 0;
+    for k = 1:trials
+    t = @timed begin
     B=A;
     for i=1:N-1
         B=B*A;
     end
     end
-    #SP:
-    t_SP = @timed begin
-    f=z->z^N;
-    F = schur_parlett(A, f)
+    t_naive = t_naive + t[2];
     end
-    display(norm(B-F))
+    t_naive = t_naive/trials;
+    #SP:
+    t_SP = 0
+    for k = 1:trials
+    t = @timed begin
+    g=z->z^N;
+    F = schur_parlett(A, g)
+    end
+    t_SP = t_SP + t[2];
+    end
+    t_SP = t_SP/trials;
 
-    scatter!(plt, [N], [t_naive[2]], marker=:x, color=:black, label=nothing)
-    scatter!(plt, [N], [t_SP[2]], marker=:o, color=:red, label=nothing)
+    scatter!(plt, [N], [t_naive], marker=:x, color=:black, label=nothing)
+    scatter!(plt, [N], [t_SP], marker=:o, color=:red, label=nothing)
     display(plt)
 end
 
